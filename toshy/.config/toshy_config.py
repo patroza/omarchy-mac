@@ -44,7 +44,7 @@ emergency_eject_key(Key.F16)    # default key: F16
 
 timeouts(
     multipurpose        = 1,        # default: 1 sec
-    suspend             = 1,        # default: 1 sec, try 0.1 sec for touchpads/trackpads
+    suspend             = 0,        # default: 1 sec, try 0.1 sec for touchpads/trackpads
 )
 
 # Delays often needed for Wayland and/or virtual machines or slow systems
@@ -705,7 +705,8 @@ keyboards_UserCustom_dct = {
     # Add your keyboard device here if its type is misidentified.
     # Valid types to map device to: Apple, Windows, IBM, Chromebook (case sensitive)
     # Example:
-    'My Keyboard Device Name': 'Apple',
+    'MoErgo Glove80 Left Keyboard': 'Apple',
+    'Keyboard passthrough': 'Apple'
 }
 
 ###  SLICE_MARK_END: kbtype_override  ###  EDITS OUTSIDE THESE MARKS WILL BE LOST ON UPGRADE
@@ -3648,12 +3649,87 @@ keymap("OptSpecialChars - US", {
 keymap("User hardware keys", {
     # PUT UNIVERSAL REMAPS FOR HARDWARE KEYS HERE
     # KEYMAP WILL BE ACTIVE IN ALL DESKTOP ENVIRONMENTS/DISTROS
-
+    
+   # on the Glove80, there's the left side T1+T4 that acts as RCMD for easy save etc. but C should be ctrl+c,, and R should ctrl+r (reload)
+   C("RSuper-C"):                  C("C-C"),
+   C("RSuper-R"):                  C("C-R"),
+   C("RSuper-B"):                  C("C-B"), # bold etc.. hmmm.. this is where the Glove80 needs to operate differently between Linux and Mac; most of the LT1+3 combo's are supposed to be CTRL...
+                                             # they T1+T3 trick is really just for LHOK+RHOM situations... but we should really train for right modifiers + left keys, and less mouse! 
+   C("RC-C"):                 C("C-Insert"),            # Copy
+   C("RC-V"):                 C("Shift-Insert"),        # Paste
+   # Meta
+   #C("C-Alt-Super"):               C("C-Alt-Super")
 
 }, when = lambda ctx:
     cnfg.screen_has_focus and
     matchProps(not_clas=remoteStr)(ctx)
 )
+
+# # Create a new "Hyper" modifier key alias on F19
+# Modifier("HYPER", aliases=["LHyper", "Hyper"], key=Key.F19)
+
+# # Physical CapsLock is F19
+# modmap("CapsLock is F19", {
+#     Key.CAPSLOCK: Key.F19,
+# }, when = lambda ctx:
+#     matchProps(not_clas=remoteStr)(ctx)
+# )
+
+# # # Physical CapsLock is Escape (when tapped) and F19 (when held with other key like modifier)
+# # multipurpose_modmap("CapsLock is Esc and F19", {
+# #     Key.CAPSLOCK: [Key.ESC, Key.F19],
+# # }, when = lambda ctx:
+# #     matchProps(not_clas=remoteStr)(ctx)
+# # )
+
+
+# def generate_all_keys_remaps(
+#     mod_remap_pairs: List[Tuple[str, str]],
+#     existing_remaps_dct: Dict[str, str]
+# ):
+#     """
+#     Generate a dictionary of all possible remaps for a keymap.
+
+#     Args:
+#         mod_remap_pairs: 
+#             A list of tuples where each tuple contains:
+#             - An input modifier string (e.g., "Shift-Hyper").
+#             - A target modifier string (e.g., "Shift-C-Alt-Super").
+#         existing_remaps_dct: 
+#             An existing dictionary of remaps to extend.
+
+#     Returns:
+#         A dictionary with the generated keymapper remaps added.
+#     """
+
+#     non_modifier_keys = [key for key in Key if not Modifier.is_key_modifier(key)]
+#     for key in non_modifier_keys:
+#         for input_mod_str, target_mod_str in mod_remap_pairs:
+#             input_combo     = C(f"{input_mod_str}-{key.name}")
+#             target_combo    = C(f"{target_mod_str}-{key.name}")
+#             existing_remaps_dct[input_combo] = target_combo
+
+#     return existing_remaps_dct
+
+
+# hyper_mod_remap_pairs = [
+#     ("Hyper",           "C-Alt-Super"),
+#     ("Shift-Hyper",     "Shift-C-Alt-Super"),
+# ]
+# hyper_and_shift_hyper_remaps_dct = {}
+# generate_all_keys_remaps(hyper_mod_remap_pairs, hyper_and_shift_hyper_remaps_dct)
+
+
+# keymap("Hyper and Shift-Hyper remaps (auto-gen)", 
+#     {**hyper_and_shift_hyper_remaps_dct,
+# }, when = lambda ctx:
+#         cnfg.screen_has_focus and
+#         matchProps(not_clas=remoteStr)(ctx) )
+
+# keymap("Hyper and Shift-Hyper remaps (auto-gen)2", 
+#     {
+#     C("F19"):                 None, # don't let F19 come through
+# })
 
 ###  SLICE_MARK_END: user_apps  ###  EDITS OUTSIDE THESE MARKS WILL BE LOST ON UPGRADE
 ###################################################################################################
@@ -4400,7 +4476,9 @@ keymap("VSCodes overrides for not Chromebook/IBM", {
     matchProps(clas=vscodeStr)(ctx)
 )
 keymap("VSCodes", {
-    # C("Super-Space"):           C("C-Space"),                  # Basic code completion (conflicts with input switching)
+    C("Super-Space"):           C("C-Space"),                  # Basic code completion (conflicts with input switching)
+    
+    C("Super-R"):         C("C-R"),              # frigging terminal history!
 
     # Override the global Cmd+Dot (Escape/cancel) shortcut for QuickFix in VSCode(s)
     C("RC-Dot"):                C("C-Dot"),                     # QuickFix, overriding global shortcut
@@ -4415,7 +4493,8 @@ keymap("VSCodes", {
     C("Alt-RC-R"):              C("Alt-R"),                     # Find: toggle "Use Regular Expression"
     C("Alt-RC-L"):              C("Alt-L"),                     # Find: toggle "Find in Selection"
     C("Alt-RC-P"):              C("Alt-P"),                     # Replace: toggle "Preserve Case"
-    C("RC-Enter"):              C("C-Alt-Enter"),               # Find: Replace All
+    #C("RC-Enter"):              C("C-Alt-Enter"),               # Find: Replace All
+    #C("RC-Enter"):              C("C-Enter"),               # Git: Commit Changes - that's the default anyway now..
 
     C("Alt-RC-Z"):              C("Alt-Z"),                     # View: toggle "Word Wrap"
 
@@ -4456,9 +4535,9 @@ keymap("VSCodes", {
     C("C-g"):                   ignore_combo,                   # cancel Go to Line...
     C("Super-g"):               C("C-g"),                       # Go to Line...
     C("F3"):                    ignore_combo,                   # cancel Find next
-    C("C-h"):                   ignore_combo,                   # cancel replace
+    #C("C-h"):                   ignore_combo,                   # cancel replace
     C("C-Alt-f"):               C("C-h"),                       # replace
-    C("C-Shift-h"):             ignore_combo,                   # cancel replace_next
+    #C("C-Shift-h"):             ignore_combo,                   # cancel replace_next
     C("C-Alt-e"):               C("C-Shift-h"),                 # replace_next
     C("f3"):                    ignore_combo,                   # cancel find_next
     C("C-g"):                   C("f3"),                        # find_next
@@ -5429,14 +5508,15 @@ keymap("General GUI", {
     # C("Alt-RC-Space"):          C(""),                          # Open Finder - Placeholder not-deepin
 
     # Wordwise
-    C("RC-Left"):               C("Home"),                      # Beginning of Line
-    C("Shift-RC-Left"):         C("Shift-Home"),                # Select all to Beginning of Line
-    C("RC-Right"):              C("End"),                       # End of Line
-    C("Shift-RC-Right"):        C("Shift-End"),                 # Select all to End of Line
-    C("RC-Up"):                 C("C-Home"),                    # Beginning of File
-    C("Shift-RC-Up"):           C("C-Shift-Home"),              # Select all to Beginning of File
-    C("RC-Down"):               C("C-End"),                     # End of File
-    C("Shift-RC-Down"):         C("C-Shift-End"),               # Select all to End of File
+    # messes with alt grave window navigation.. let's see if we can use not RC but LC?
+    # C("RC-Left"):               C("Home"),                      # Beginning of Line
+    # C("Shift-RC-Left"):         C("Shift-Home"),                # Select all to Beginning of Line
+    # C("RC-Right"):              C("End"),                       # End of Line
+    # C("Shift-RC-Right"):        C("Shift-End"),                 # Select all to End of Line
+    # C("RC-Up"):                 C("C-Home"),                    # Beginning of File
+    # C("Shift-RC-Up"):           C("C-Shift-Home"),              # Select all to Beginning of File
+    # C("RC-Down"):               C("C-End"),                     # End of File
+    # C("Shift-RC-Down"):         C("C-Shift-End"),               # Select all to End of File
     C("Super-Backspace"):       C("C-Backspace"),               # Delete Left Word of Cursor
     C("Super-Delete"):          C("C-Delete"),                  # Delete Right Word of Cursor
     C("RC-Backspace"):          C("C-Shift-Backspace"),         # Delete Entire Line Left of Cursor
